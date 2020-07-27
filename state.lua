@@ -42,7 +42,7 @@ end
 
 function states.set_current_state(name, ...)
 	local current_state = states.current_state
-	local next_state = states.gamestates[name]
+	local next_state = states.gamestates[name] or name
 
 	assert(next_state, "State \"" .. tostring(name) .. "\" doesn't exist.")
 
