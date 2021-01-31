@@ -6,16 +6,20 @@ local state = {
 
 state.__index = state
 
+function state:on_load()
+	--Called when the state is loaded, used for initializing.
+end
+
 function state:on_first_enter()
 	--Called when the state is entered for the first time, only happens once.
 end
 
 function state:on_enter()
-	--called when the state is entered, regardless of if it's the first time.
+	--Called when the state is entered, regardless of if it's the first time.
 end
 
-function state:on_state_changed()
-	--called when changing to a different state.
+function state:on_exit()
+	--Called when changing to a different state.
 end
 
 function state:update(dt)
@@ -37,7 +41,7 @@ local states = {
 }
 
 function states.get_state(name)
-	return states.gamestates[name]
+	return states.gamestates[name] or name
 end
 
 function states.set_current_state(name, ...)
@@ -47,7 +51,7 @@ function states.set_current_state(name, ...)
 	assert(next_state, "State \"" .. tostring(name) .. "\" doesn't exist.")
 
 	if current_state and next_state ~= current_state then
-		current_state:on_state_changed()
+		current_state:on_exit()
 	end
 
 	states.current_state = next_state
@@ -68,6 +72,8 @@ function states.load_states(folder)
 
 		if love.filesystem.getInfo(file_path, "file") then
 			local new_state = setmetatable(require(file_path:gsub(".lua", "")), state)
+			new_state:on_load()
+			
 			states.gamestates[item:gsub(".lua", "")] = new_state
 		end
 	end
