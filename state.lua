@@ -36,9 +36,17 @@ for event in pairs(love.handlers) do
 	end
 end
 
+------------------------
+
 local states = {
-	gamestates = {}
+	gamestates = {},
+	stack = {}
 }
+
+function states.pop(...)
+	table.remove(states.stack)
+	states.set_current_state(states.stack[#states.stack], ...)
+end
 
 function states.get_state(name)
 	return states.gamestates[name] or name
@@ -62,6 +70,7 @@ function states.set_current_state(name, ...)
 	end
 
 	if current_state ~= next_state then
+		table.insert(states.stack, next_state)
 		next_state:on_enter(...)
 	end
 end
@@ -93,16 +102,10 @@ function love.draw()
 	end
 end
 
-function love.quit()
-	if states.current_state then
-		states.current_state:quit()
-	end
-end
-
 for event in pairs(love.handlers) do
 	love[event] = function(...)
 		if states.current_state then
-			states.current_state[event](states.current_state, ...)
+			return states.current_state[event](states.current_state, ...)
 		end
 	end
 end
